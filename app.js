@@ -1,23 +1,22 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-  const navLinks = document.querySelectorAll("nav ul li a");
-
-  navLinks.forEach(link => {
-      link.addEventListener("click", function (event) {
-          event.preventDefault();
-          const url = this.getAttribute("data-url");
-          loadTreeMap(url);
-      });
-  });
+  const url = "https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/video-game-sales-data.json";
 
   function loadTreeMap(url) {
-      d3.json(url).then((data) => {
-          d3.select("#tree-map svg").remove(); // Clear the previous tree-map
-          d3.select("#legend svg").remove(); // Clear the previous legend
 
+      d3.select("#tree-map svg").remove();
+      d3.select("#legend svg").remove();
+
+      d3.json(url).then((data) => {
           const containerWidth = document.getElementById("container").offsetWidth;
-          const svgWidth = Math.min(containerWidth, 960);
-          const svgHeight = (svgWidth / 960) * 570;
+          let svgWidth = Math.min(containerWidth, 960);
+          let svgHeight = (svgWidth / 960) * 570;
+          let fontSize = "10px";
+
+          if (containerWidth < 480) {
+              svgHeight = svgWidth * 0.75;
+              fontSize = "8px";
+          }
 
           const svg = d3.select("#tree-map")
               .append("svg")
@@ -62,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
           tile
               .append("text")
               .attr("pointer-events", "none")
-              .style("font-size", "10px")
+              .style("font-size", fontSize)
               .selectAll("tspan")
               .data((d) => {
                   const words = d.data.name.split(" ");
@@ -121,9 +120,21 @@ document.addEventListener("DOMContentLoaded", function () {
               .attr("x", 25)
               .attr("y", 15)
               .text((d) => d);
+
       });
   }
 
-  // Carga inicial de datos
-  loadTreeMap("https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/video-game-sales-data.json");
+  const navLinks = document.querySelectorAll('nav ul li a');
+  navLinks.forEach(link => {
+      link.addEventListener('click', function (event) {
+          event.preventDefault();
+          const dataUrl = this.getAttribute('data-url');
+          if (dataUrl) {
+              loadTreeMap(dataUrl);
+          }
+      });
+  });
+
+  loadTreeMap(url);
+
 });
