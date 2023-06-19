@@ -38,7 +38,6 @@ nav ul li a:hover {
 #tree-map {
   display: inline-block;
   margin: 0 auto;
-  max-width: 100%;
 }
 
 #legend {
@@ -61,7 +60,16 @@ nav ul li a:hover {
 }
 
 /* Responsive styles */
-#tree-map svg {
-    width: 100%;
-    height: auto;
+@media screen and (max-width: 480px) {
+    #tree-map svg {
+        height: 300px !important;
+    }
+
+    #container {
+        padding: 5px;
+    }
+    
+    nav ul li a {
+        padding: 10px;
+    }
 }
