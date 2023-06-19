@@ -1,30 +1,21 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const url =
-      "https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/video-game-sales-data.json";
+  const url = "https://cdn.freecodecamp.org/testable-projects-fcc/data/tree_map/video-game-sales-data.json";
 
   d3.json(url).then((data) => {
-      const width = document.documentElement.clientWidth * 0.8;
-      const height = 570;
-
-      const svg = d3
-          .select("#tree-map")
+      const svg = d3.select("#tree-map")
           .append("svg")
-          .attr("width", width)
-          .attr("height", height)
-          .style("display", "block")
-          .style("margin", "0 auto");
+          .attr("width", 960)
+          .attr("height", 570);
 
-      const root = d3
-          .hierarchy(data)
+      const root = d3.hierarchy(data)
           .sum((d) => d.value)
           .sort((a, b) => b.height - a.height || b.value - a.value);
 
-      d3.treemap().size([width, height]).paddingInner(1)(root);
+      d3.treemap().size([960, 570]).paddingInner(1)(root);
 
       const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-      const tile = svg
-          .selectAll("g")
+      const tile = svg.selectAll("g")
           .data(root.leaves())
           .enter()
           .append("g")
@@ -32,8 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const tooltip = d3.select("#tooltip");
 
-      tile
-          .append("rect")
+      tile.append("rect")
           .attr("class", "tile")
           .attr("width", (d) => d.x1 - d.x0)
           .attr("height", (d) => d.y1 - d.y0)
@@ -43,9 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
           .attr("data-value", (d) => d.data.value)
           .on("mousemove", function (event, d) {
               tooltip.style("opacity", 1);
-              tooltip.html(
-                  `Name: ${d.data.name}<br>Category: ${d.data.category}<br>Value: ${d.data.value}`
-              );
+              tooltip.html(`Name: ${d.data.name}<br>Category: ${d.data.category}<br>Value: ${d.data.value}`);
               tooltip.attr("data-value", d.data.value);
               tooltip.style("top", event.pageY - 30 + "px");
               tooltip.style("left", event.pageX + 10 + "px");
@@ -56,40 +44,65 @@ document.addEventListener("DOMContentLoaded", function () {
 
       tile
           .append("text")
+          .attr("pointer-events", "none")
+          .style("font-size", "10px")
+          .selectAll("tspan")
+          .data((d) => {
+              const words = d.data.name.split(" ");
+              const width = d.x1 - d.x0;
+              let line = [];
+              let lines = [line];
+              words.forEach((word) => {
+                  if (line.join(" ").length + word.length < width / 5) {
+                      line.push(word);
+                  } else {
+                      line = [word];
+                      lines.push(line);
+                  }
+              });
+              return lines.map(line => line.join(" "));
+          })
+          .enter()
+          .append("tspan")
           .attr("x", 5)
-          .attr("y", 15)
-          .style("font-size", "12px")
-          .text((d) => d.data.name);
+          .attr("y", (d, i) => 15 + i * 12)
+          .text((d) => d);
 
       const categories = root.leaves().map((d) => d.data.category);
       const uniqueCategories = [...new Set(categories)];
 
-      const legend = d3
-          .select("#legend")
+      const legend = d3.select("#legend")
           .append("svg")
           .attr("width", 400)
-          .attr("height", 120);
+          .attr("height", 200);
 
-      legend
-          .selectAll("rect")
+      const legendItem = legend.selectAll("g")
           .data(uniqueCategories)
           .enter()
-          .append("rect")
+          .append("g")
+          .attr("transform", (d, i) => `translate(${i % 3 * 130}, ${Math.floor(i / 3) * 30})`);
+
+      legendItem.append("rect")
           .attr("class", "legend-item")
-          .attr("x", (d, i) => (i % 6) * 60)
-          .attr("y", (d, i) => Math.floor(i / 6) * 30)
+          .attr("x", 0)
+          .attr("y", 0)
           .attr("width", 20)
           .attr("height", 20)
-          .attr("fill", (d) => color(d));
+          .attr("fill", (d) => color(d))
+          .on("mousemove", function (event, d) {
+              const games = root.leaves().filter(leaf => leaf.data.category === d).map(leaf => leaf.data.name).join(", ");
+              tooltip.style("opacity", 1);
+              tooltip.html(`Games: ${games}`);
+              tooltip.style("top", event.pageY - 30 + "px");
+              tooltip.style("left", event.pageX + 10 + "px");
+          })
+          .on("mouseout", () => {
+              tooltip.style("opacity", 0);
+          });
 
-      legend
-          .selectAll("text")
-          .data(uniqueCategories)
-          .enter()
-          .append("text")
-          .attr("x", (d, i) => (i % 6) * 60 + 25)
-          .attr("y", (d, i) => Math.floor(i / 6) * 30 + 15)
-          .style("font-size", "12px")
+      legendItem.append("text")
+          .attr("x", 25)
+          .attr("y", 15)
           .text((d) => d);
   });
 });
