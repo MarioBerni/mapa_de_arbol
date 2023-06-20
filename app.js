@@ -89,7 +89,6 @@ document.addEventListener("DOMContentLoaded", function () {
           .data(uniqueCategories)
           .enter()
           .append("g")
-          // Aumentar la distancia horizontal entre elementos
           .attr("transform", (d, i) => `translate(${i % 3 * 160}, ${Math.floor(i / 3) * 30})`);
       
       legendItem.append("rect")
@@ -113,11 +112,10 @@ document.addEventListener("DOMContentLoaded", function () {
       legendItem.append("text")
           .attr("x", 25)
           .attr("y", 15)
-          .style("font-size", "12px") // Añadir estilo adicional para los elementos de texto.
+          .style("font-size", "12px")
           .text((d) => d);      
       });
   }
-
   document.querySelectorAll("nav ul li a").forEach(link => {
       link.addEventListener("click", function (event) {
           event.preventDefault();
@@ -126,9 +124,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   loadTreeMap(defaultUrl);
-
   window.addEventListener("resize", () => {
       loadTreeMap(defaultUrl);
   });
-
+  
 });
