@@ -4,12 +4,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function loadTreeMap(url) {
       d3.json(url).then((data) => {
-          // Remove the existing SVG elements (if they exist)
           d3.select("#tree-map svg").remove();
           d3.select("#legend svg").remove();
 
           const containerWidth = document.getElementById("container").offsetWidth;
-          const svgWidth = Math.min(containerWidth, 960);
+          const svgWidth = containerWidth < 600 ? containerWidth : Math.min(containerWidth, 960);
           const svgHeight = (svgWidth / 960) * 570;
           const fontSize = Math.max(8, svgWidth / 120);
 
@@ -82,42 +81,43 @@ document.addEventListener("DOMContentLoaded", function () {
           const uniqueCategories = [...new Set(categories)];
 
           const legend = d3.select("#legend")
-              .append("svg")
-              .attr("width", 400)
-              .attr("height", 200);
-
-          const legendItem = legend.selectAll("g")
-              .data(uniqueCategories)
-              .enter()
-              .append("g")
-              .attr("transform", (d, i) => `translate(${i % 3 * 130}, ${Math.floor(i / 3) * 30})`);
-
-          legendItem.append("rect")
-              .attr("class", "legend-item")
-              .attr("x", 0)
-              .attr("y", 0)
-              .attr("width", 20)
-              .attr("height", 20)
-              .attr("fill", (d) => color(d))
-              .on("mousemove", function (event, d) {
-                  const games = root.leaves().filter(leaf => leaf.data.category === d).map(leaf => leaf.data.name).join(", ");
-                  tooltip.style("opacity", 1);
-                  tooltip.html(`Games: ${games}`);
-                  tooltip.style("top", event.pageY - 30 + "px");
-                  tooltip.style("left", event.pageX + 10 + "px");
-              })
-              .on("mouseout", () => {
-                  tooltip.style("opacity", 0);
-              });
-
-          legendItem.append("text")
-              .attr("x", 25)
-              .attr("y", 15)
-              .text((d) => d);
+          .append("svg")
+          .attr("width", 400)
+          .attr("height", 200);
+      
+      const legendItem = legend.selectAll("g")
+          .data(uniqueCategories)
+          .enter()
+          .append("g")
+          // Aumentar la distancia horizontal entre elementos
+          .attr("transform", (d, i) => `translate(${i % 3 * 160}, ${Math.floor(i / 3) * 30})`);
+      
+      legendItem.append("rect")
+          .attr("class", "legend-item")
+          .attr("x", 0)
+          .attr("y", 0)
+          .attr("width", 20)
+          .attr("height", 20)
+          .attr("fill", (d) => color(d))
+          .on("mousemove", function (event, d) {
+              const games = root.leaves().filter(leaf => leaf.data.category === d).map(leaf => leaf.data.name).join(", ");
+              tooltip.style("opacity", 1);
+              tooltip.html(`Games: ${games}`);
+              tooltip.style("top", event.pageY - 30 + "px");
+              tooltip.style("left", event.pageX + 10 + "px");
+          })
+          .on("mouseout", () => {
+              tooltip.style("opacity", 0);
+          });
+      
+      legendItem.append("text")
+          .attr("x", 25)
+          .attr("y", 15)
+          .style("font-size", "12px") // Añadir estilo adicional para los elementos de texto.
+          .text((d) => d);      
       });
   }
 
-  // Handle nav link clicks
   document.querySelectorAll("nav ul li a").forEach(link => {
       link.addEventListener("click", function (event) {
           event.preventDefault();
@@ -125,10 +125,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
-  // Load the initial tree map
   loadTreeMap(defaultUrl);
 
-  // Handle window resize
   window.addEventListener("resize", () => {
       loadTreeMap(defaultUrl);
   });

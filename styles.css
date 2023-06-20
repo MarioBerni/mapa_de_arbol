@@ -59,17 +59,10 @@ nav ul li a:hover {
   cursor: pointer;
 }
 
-/* Responsive styles */
-@media screen and (max-width: 480px) {
-    #tree-map svg {
-        height: 300px !important;
-    }
-
-    #container {
-        padding: 5px;
-    }
-    
-    nav ul li a {
-        padding: 10px;
-    }
+@media only screen and (max-width: 600px) {
+  #tree-map svg {
+      width: 100%;
+      height: auto;
+  }
 }
+
